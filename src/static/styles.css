@@ -1,19 +1,19 @@
 /* Color palette */
 :root {
-  /* Primary colors */
-  --primary: #1a237e;
-  --primary-light: #534bae;
-  --primary-dark: #000051;
+  /* Primary colors - Mergington High School colors: white and lime green */
+  --primary: #2e7d32;
+  --primary-light: #60ad5e;
+  --primary-dark: #005005;
   --primary-text: #ffffff;
 
   /* Secondary colors */
-  --secondary: #ff6f00;
-  --secondary-light: #ffa040;
-  --secondary-dark: #c43e00;
-  --secondary-text: #ffffff;
+  --secondary: #76ff03;
+  --secondary-light: #b0ff57;
+  --secondary-dark: #32cb00;
+  --secondary-text: #1a1a1a;
 
   /* Neutral colors */
-  --background: #f5f5f5;
+  --background: #f9fffe;
   --surface: #ffffff;
   --text-primary: #333333;
   --text-secondary: #666666;
@@ -195,8 +195,8 @@ section h3 {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: #e8eaf6;
-  color: #3949ab;
+  background: #e8f5e9;
+  color: #2e7d32;
   font-size: 0.65rem;
   font-weight: bold;
   padding: 2px 6px;
@@ -663,4 +663,40 @@ footer {
 
 #logout-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Animated Git branch background canvas */
+#git-branches-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+/* Mascot strip in header */
+.mascot-strip {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mascot {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.mascot:hover {
+  transform: scale(1.15);
 }

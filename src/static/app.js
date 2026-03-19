@@ -866,3 +866,134 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeFilters();
   fetchActivities();
 });
+
+// Animated Git-style branch lines background
+(function initGitBranchBackground() {
+  const canvas = document.getElementById("git-branches-bg");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  // Branch configuration
+  const BRANCH_COLOR = "#2e7d32";
+  const COMMIT_COLOR = "#76ff03";
+  const NUM_BRANCHES = 6;
+  const BRANCH_SPEED = 0.3; // pixels per frame
+
+  let branches = [];
+  let animationId;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  // A branch is a vertical line with commit dots, slowly scrolling upward
+  function createBranch(x) {
+    const commitSpacing = 80 + Math.random() * 60;
+    const offsetY = Math.random() * canvas.height;
+    return {
+      x,
+      offsetY,
+      commitSpacing,
+      // Merges: array of {fromX, toX, atY} defining a curved merge line
+      merges: [],
+    };
+  }
+
+  function initBranches() {
+    branches = [];
+    const spacing = canvas.width / (NUM_BRANCHES + 1);
+    for (let i = 1; i <= NUM_BRANCHES; i++) {
+      const b = createBranch(spacing * i);
+      // Randomly add a merge connection to the next branch
+      if (i < NUM_BRANCHES && Math.random() > 0.4) {
+        const mergeY = 50 + Math.random() * (canvas.height - 100);
+        b.merges.push({ toX: spacing * (i + 1), atY: mergeY });
+      }
+      branches.push(b);
+    }
+  }
+
+  function drawCommitDot(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = COMMIT_COLOR;
+    ctx.fill();
+    ctx.strokeStyle = BRANCH_COLOR;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function drawMergeCurve(fromX, fromY, toX, toY) {
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    // Bezier curve for a nice branch arc
+    ctx.bezierCurveTo(
+      fromX, fromY - 30,
+      toX, toY + 30,
+      toX, toY
+    );
+    ctx.strokeStyle = BRANCH_COLOR;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  function draw(timestamp) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    branches.forEach((b) => {
+      // Scroll branches upward slowly
+      b.offsetY -= BRANCH_SPEED;
+      if (b.offsetY < -canvas.height) {
+        b.offsetY += canvas.height * 2;
+      }
+
+      // Draw vertical branch line
+      ctx.beginPath();
+      ctx.moveTo(b.x, 0);
+      ctx.lineTo(b.x, canvas.height);
+      ctx.strokeStyle = BRANCH_COLOR;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Draw commit dots along the branch
+      // Double modulo handles negative offsetY: ensures result is in [0, commitSpacing)
+      let y = ((b.offsetY % b.commitSpacing) + b.commitSpacing) % b.commitSpacing;
+      while (y < canvas.height) {
+        drawCommitDot(b.x, y);
+        y += b.commitSpacing;
+      }
+
+      // Draw merge curves
+      b.merges.forEach((m) => {
+        const mergeY = ((m.atY + b.offsetY) % canvas.height + canvas.height) % canvas.height;
+        drawMergeCurve(b.x, mergeY, m.toX, mergeY - 40);
+        drawCommitDot(m.toX, mergeY - 40);
+      });
+    });
+
+    animationId = requestAnimationFrame(draw);
+  }
+
+  function start() {
+    resize();
+    initBranches();
+    animationId = requestAnimationFrame(draw);
+  }
+
+  window.addEventListener("resize", () => {
+    resize();
+    initBranches();
+  });
+
+  // Cancel animation if the canvas is removed from the DOM
+  const observer = new MutationObserver(() => {
+    if (!document.getElementById("git-branches-bg")) {
+      cancelAnimationFrame(animationId);
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  start();
+})();
